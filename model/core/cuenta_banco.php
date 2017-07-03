@@ -76,9 +76,9 @@ class cuenta_banco extends \fs_model {
                 $txt .= substr($iban, $i, 4) . ' ';
             }
             return $txt;
-        } else {
-            return str_replace(' ', '', $this->iban);
         }
+        
+        return str_replace(' ', '', $this->iban);
     }
 
     /**
@@ -98,9 +98,9 @@ class cuenta_banco extends \fs_model {
         $data = $this->db->select("SELECT * FROM " . $this->table_name . " WHERE codcuenta = " . $this->var2str($cod) . ";");
         if ($data) {
             return new \cuenta_banco($data[0]);
-        } else {
-            return FALSE;
         }
+        
+        return FALSE;
     }
 
     /**
@@ -109,12 +109,12 @@ class cuenta_banco extends \fs_model {
      */
     private function get_new_codigo() {
         $sql = "SELECT MAX(" . $this->db->sql_to_int('codcuenta') . ") as cod FROM " . $this->table_name . ";";
-        $cod = $this->db->select($sql);
-        if ($cod) {
-            return 1 + intval($cod[0]['cod']);
-        } else {
-            return 1;
+        $data = $this->db->select($sql);
+        if ($data) {
+            return (string) (1 + (int) $data[0]['cod']);
         }
+        
+        return '1';
     }
 
     /**
@@ -124,9 +124,9 @@ class cuenta_banco extends \fs_model {
     public function exists() {
         if (is_null($this->codcuenta)) {
             return FALSE;
-        } else {
-            return $this->db->select("SELECT * FROM " . $this->table_name . " WHERE codcuenta = " . $this->var2str($this->codcuenta) . ";");
         }
+        
+        return $this->db->select("SELECT * FROM " . $this->table_name . " WHERE codcuenta = " . $this->var2str($this->codcuenta) . ";");
     }
 
     /**
@@ -190,7 +190,7 @@ class cuenta_banco extends \fs_model {
      * @return string
      */
     public function calcular_iban($ccc) {
-        $codpais = substr($this->empresa->codpais, 0, 2);
+        $codpais = substr($this->default_items->codpais(), 0, 2);
 
         $pesos = array('A' => '10', 'B' => '11', 'C' => '12', 'D' => '13', 'E' => '14', 'F' => '15',
             'G' => '16', 'H' => '17', 'I' => '18', 'J' => '19', 'K' => '20', 'L' => '21', 'M' => '22',

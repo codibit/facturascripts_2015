@@ -81,6 +81,13 @@ class admin_info extends fs_controller {
             $this->new_advice('Se está ejecutando el cron.');
         }
 
+        $this->ini_filters();
+        $this->buscar_en_log();
+        $this->get_db_tables();
+        $this->modulos_eneboo();
+    }
+    
+    private function ini_filters() {
         $this->b_alerta = fs_filter_input_req('b_alerta');
         $this->b_desde = '';
         $this->b_detalle = '';
@@ -89,7 +96,7 @@ class admin_info extends fs_controller {
         $this->b_tipo = '';
         $this->b_usuario = '';
 
-        if (fs_filter_input_req('b_desde')) {
+        if (fs_filter_input_req('b_desde') !== NULL) {
             $this->b_desde = fs_filter_input_req('b_desde');
             $this->b_detalle = fs_filter_input_req('b_detalle');
             $this->b_hasta = fs_filter_input_req('b_hasta');
@@ -98,12 +105,8 @@ class admin_info extends fs_controller {
         }
 
         if (fs_filter_input_req('b_ip')) {
-            $this->b_ip = fs_filter_input_req('b_ip');
+            $this->b_ip = (string) fs_filter_input_req('b_ip');
         }
-
-        $this->buscar_en_log();
-        $this->get_db_tables();
-        $this->modulos_eneboo();
     }
 
     public function php_version() {
@@ -132,43 +135,34 @@ class admin_info extends fs_controller {
 
     private function buscar_en_log() {
         $this->resultados = array();
-
-        $sql = "SELECT * FROM fs_logs";
-        $and = ' WHERE ';
+        $sql = "SELECT * FROM fs_logs WHERE 1=1";
 
         if ($this->b_usuario != '') {
-            $sql .= $and . ' usuario = ' . $this->empresa->var2str($this->b_usuario);
-            $and = ' AND ';
+            $sql .= ' AND usuario = ' . $this->empresa->var2str($this->b_usuario);
         }
 
         if ($this->b_tipo != '') {
-            $sql .= $and . ' tipo = ' . $this->empresa->var2str($this->b_tipo);
-            $and = ' AND ';
+            $sql .= ' AND tipo = ' . $this->empresa->var2str($this->b_tipo);
         }
 
         if ($this->b_alerta != '') {
-            $sql .= $and . ' alerta';
-            $and = ' AND ';
+            $sql .= ' AND alerta';
         }
 
         if ($this->b_detalle != '') {
-            $sql .= $and . " lower(detalle) LIKE '%" . $this->empresa->no_html(mb_strtolower($this->b_detalle, 'UTF8')) . "%'";
-            $and = ' AND ';
+            $sql .= " AND lower(detalle) LIKE '%" . $this->empresa->no_html(mb_strtolower($this->b_detalle, 'UTF8')) . "%'";
         }
 
         if ($this->b_ip != '') {
-            $sql .= $and . " ip LIKE '" . $this->empresa->no_html($this->b_ip) . "%'";
-            $and = ' AND ';
+            $sql .= " AND ip LIKE '" . $this->empresa->no_html($this->b_ip) . "%'";
         }
 
         if ($this->b_desde != '') {
-            $sql .= $and . ' fecha >= ' . $this->empresa->var2str($this->b_desde);
-            $and = ' AND ';
+            $sql .= ' AND fecha >= ' . $this->empresa->var2str($this->b_desde);
         }
 
         if ($this->b_hasta != '') {
-            $sql .= $and . ' fecha <= ' . $this->empresa->var2str($this->b_hasta);
-            $and = ' AND ';
+            $sql .= ' AND fecha <= ' . $this->empresa->var2str($this->b_hasta);
         }
 
         $sql .= ' ORDER BY fecha DESC';
